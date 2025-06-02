@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1000 Pertanyaan Umum v2 reno</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .input-field {
+            background-color: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+        }
+        .input-field::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        .option-btn {
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .option-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        .option-btn.correct {
+            background-color: #28a745 !important; /* Green */
+            border-color: #28a745 !important;
+            color: white;
+        }
+        .option-btn.incorrect {
+            background-color: #dc3545 !important; /* Red */
+            border-color: #dc3545 !important;
+            color: white;
+        }
+        .option-btn:disabled {
+            opacity: 0.7;
+        }
+        select {
+            background-color: rgba(0,0,0,0.3);
+            color: white;
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.5rem 0.75rem; /* py-2 px-3 */
+        }
+        option {
+            background-color: #333;
+            color: white;
+        }
+        /* Custom scrollbar for question area if needed */
+        .question-text-area {
+            max-height: 100px; /* Adjust as needed */
+            overflow-y: auto;
+        }
+         /* Custom scrollbar styles */
+        .question-text-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        .question-text-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .question-text-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        .question-text-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold">1000 Pertanyaan Umum</h1>
+            <p class="text-lg">by Reno</p>
+        </header>
+
+        <div id="setupScreen">
+            <h2 class="text-2xl font-semibold mb-4">Pengaturan Permainan</h2>
+            
+            <div class="mb-4">
+                <label for="numPlayers" class="block mb-2">Jumlah Pemain:</label>
+                <select id="numPlayers" class="w-full p-2 rounded input-field">
+                    <option value="1">1 Pemain</option>
+                    <option value="2">2 Pemain</option>
+                    <option value="3">3 Pemain</option>
+                    <option value="4">4 Pemain</option>
+                </select>
+            </div>
+
+            <div id="playerNamesContainer" class="mb-4">
+                </div>
+
+            <div class="mb-4">
+                <label for="category" class="block mb-2">Kategori:</label>
+                <select id="category" class="w-full p-2 rounded input-field">
+                    <option value="Semua">Semua Kategori</option>
+                    <option value="Matematika">Matematika</option>
+                    <option value="Geografi">Geografi</option>
+                    <option value="Biologi">Biologi</option>
+                    <option value="Internet">Pengetahuan Internet</option>
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label for="difficulty" class="block mb-2">Tingkat Kesulitan:</label>
+                <select id="difficulty" class="w-full p-2 rounded input-field">
+                    <option value="Easy">Mudah</option>
+                    <option value="Medium">Sedang</option>
+                    <option value="Hard">Sulit</option>
+                </select>
+            </div>
+
+            <button id="startGameBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-lg btn">
+                Mulai Bermain
+            </button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <div id="currentPlayerTurn" class="text-xl font-semibold">Giliran: Pemain 1</div>
+                <div id="timer" class="text-xl font-bold">Waktu: 30s</div>
+            </div>
+            
+            <div id="scoreBoard" class="mb-4 text-sm">
+                </div>
+            
+            <div class="bg-white bg-opacity-20 p-6 rounded-lg mb-6 shadow-lg">
+                <p id="questionNumber" class="text-sm mb-2 text-gray-300">Pertanyaan 1/10</p>
+                <div id="questionText" class="text-xl font-medium mb-4 question-text-area">Memuat pertanyaan...</div>
+                <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    </div>
+            </div>
+            
+            <div id="feedback" class="mt-4 h-8 text-lg font-semibold"></div>
+        </div>
+
+        <div id="gameOverScreen" class="hidden">
+            <h2 class="text-3xl font-bold mb-6">Permainan Selesai!</h2>
+            <div id="finalScores" class="mb-6 text-lg">
+                </div>
+            <div id="winner" class="text-2xl font-semibold mb-8"></div>
+            <button id="playAgainBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-lg btn">
+                Main Lagi
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const setupScreen = document.getElementById('setupScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+
+        const numPlayersSelect = document.getElementById('numPlayers');
+        const playerNamesContainer = document.getElementById('playerNamesContainer');
+        const categorySelect = document.getElementById('category');
+        const difficultySelect = document.getElementById('difficulty');
+        const startGameBtn = document.getElementById('startGameBtn');
+
+        const currentPlayerTurnDisplay = document.getElementById('currentPlayerTurn');
+        const timerDisplay = document.getElementById('timer');
+        const scoreBoardDisplay = document.getElementById('scoreBoard');
+        const questionNumberDisplay = document.getElementById('questionNumber');
+        const questionTextDisplay = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackDisplay = document.getElementById('feedback');
+        
+        const finalScoresDisplay = document.getElementById('finalScores');
+        const winnerDisplay = document.getElementById('winner');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+
+        // --- Game Questions ---
+        const allQuestions = [
+            // Matematika
+            { category: "Matematika", difficulty: "Easy", text: "Berapa hasil dari 12 + 8?", options: ["18", "20", "22", "24"], correctAnswer: "20" },
+            { category: "Matematika", difficulty: "Easy", text: "Berapa hasil dari 15 - 6?", options: ["7", "8", "9", "10"], correctAnswer: "9" },
+            { category: "Matematika", difficulty: "Medium", text: "Berapa hasil dari 7 * 9?", options: ["56", "63", "72", "54"], correctAnswer: "63" },
+            { category: "Matematika", difficulty: "Medium", text: "Berapa hasil dari 48 / 4?", options: ["10", "11", "12", "13"], correctAnswer: "12" },
+            { category: "Matematika", difficulty: "Hard", text: "Jika 3x - 5 = 10, berapakah nilai x?", options: ["3", "4", "5", "6"], correctAnswer: "5" },
+            { category: "Matematika", difficulty: "Hard", text: "Berapakah luas lingkaran dengan jari-jari 7 cm (gunakan π = 22/7)?", options: ["144 cm²", "154 cm²", "164 cm²", "174 cm²"], correctAnswer: "154 cm²" },
+            // Geografi
+            { category: "Geografi", difficulty: "Easy", text: "Apa ibukota negara Thailand?", options: ["Hanoi", "Kuala Lumpur", "Bangkok", "Manila"], correctAnswer: "Bangkok" },
+            { category: "Geografi", difficulty: "Easy", text: "Benua manakah yang paling kecil?", options: ["Eropa", "Australia", "Amerika Selatan", "Antartika"], correctAnswer: "Australia" },
+            { category: "Geografi", difficulty: "Medium", text: "Gunung Fuji terletak di negara mana?", options: ["Cina", "Korea Selatan", "Jepang", "Vietnam"], correctAnswer: "Jepang" },
+            { category: "Geografi", difficulty: "Medium", text: "Samudra terluas di dunia adalah...", options: ["Atlantik", "Hindia", "Arktik", "Pasifik"], correctAnswer: "Pasifik" },
+            { category: "Geografi", difficulty: "Hard", text: "Negara manakah yang dikenal dengan sebutan 'Negeri Kincir Angin'?", options: ["Belgia", "Denmark", "Belanda", "Jerman"], correctAnswer: "Belanda" },
+            { category: "Geografi", difficulty: "Hard", text: "Terusan Suez menghubungkan Laut Tengah dengan laut apa?", options: ["Laut Hitam", "Laut Merah", "Laut Kaspia", "Laut Arab"], correctAnswer: "Laut Merah" },
+            // Biologi
+            { category: "Biologi", difficulty: "Easy", text: "Organ tubuh yang berfungsi memompa darah ke seluruh tubuh adalah...", options: ["Paru-paru", "Jantung", "Hati", "Ginjal"], correctAnswer: "Jantung" },
+            { category: "Biologi", difficulty: "Easy", text: "Tumbuhan mengambil karbon dioksida dari udara melalui...", options: ["Akar", "Batang", "Bunga", "Daun (stomata)"], correctAnswer: "Daun (stomata)" },
+            { category: "Biologi", difficulty: "Medium", text: "Vitamin yang banyak terkandung dalam buah jeruk adalah...", options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"], correctAnswer: "Vitamin C" },
+            { category: "Biologi", difficulty: "Medium", text: "Proses perubahan ulat menjadi kupu-kupu disebut...", options: ["Metamorfosis", "Fotosintesis", "Respirasi", "Adaptasi"], correctAnswer: "Metamorfosis" },
+            { category: "Biologi", difficulty: "Hard", text: "Pembawa sifat keturunan pada makhluk hidup adalah...", options: ["Protein", "Lemak", "Kromosom (Gen)", "Karbohidrat"], correctAnswer: "Kromosom (Gen)" },
+            { category: "Biologi", difficulty: "Hard", text: "Enzim ptialin dalam ludah berfungsi untuk mencerna...", options: ["Protein", "Lemak", "Vitamin", "Karbohidrat (amilum)"], correctAnswer: "Karbohidrat (amilum)" },
+            // Pengetahuan Internet
+            { category: "Internet", difficulty: "Easy", text: "Perangkat keras komputer yang digunakan untuk mengetik disebut...", options: ["Mouse", "Monitor", "Keyboard", "Printer"], correctAnswer: "Keyboard" },
+            { category: "Internet", difficulty: "Easy", text: "Apa kepanjangan dari 'email'?", options: ["Electric Mail", "Emergency Mail", "Electronic Mail", "Easy Mail"], correctAnswer: "Electronic Mail" },
+            { category: "Internet", difficulty: "Medium", text: "Situs web populer untuk berbagi video adalah...", options: ["Facebook", "Instagram", "Twitter", "YouTube"], correctAnswer: "YouTube" },
+            { category: "Internet", difficulty: "Medium", text: "Apa itu 'phishing' dalam konteks keamanan internet?", options: ["Jenis ikan", "Teknik memancing data sensitif", "Virus komputer", "Mesin pencari"], correctAnswer: "Teknik memancing data sensitif" },
+            { category: "Internet", difficulty: "Hard", text: "Bahasa pemrograman yang umum digunakan untuk membuat halaman web interaktif di sisi klien adalah...", options: ["Python", "Java", "JavaScript", "C++"], correctAnswer: "JavaScript" },
+            { category: "Internet", difficulty: "Hard", text: "Istilah untuk jaringan komputer global yang menghubungkan jutaan perangkat adalah...", options: ["Intranet", "LAN", "WAN", "Internet"], correctAnswer: "Internet" }
+        ];
+
+        // --- Game State ---
+        let playerNames = [];
+        let scores = [];
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentPlayerIndex = 0;
+        let timerInterval;
+        let timeLeft = 0;
+        let questionsPerPlayer = 5; // Jumlah pertanyaan per pemain per game
+        let totalRounds = 0;
+
+        const timerSettings = {
+            Easy: 30,
+            Medium: 20,
+            Hard: 15
+        };
+
+        // --- Event Listeners ---
+        numPlayersSelect.addEventListener('change', updatePlayerNameInputs);
+        startGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', resetGame);
+
+        // --- Functions ---
+        function updatePlayerNameInputs() {
+            const count = parseInt(numPlayersSelect.value);
+            playerNamesContainer.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `playerName${i+1}`;
+                input.placeholder = `Nama Pemain ${i+1}`;
+                input.className = 'w-full p-2 rounded input-field mb-2';
+                playerNamesContainer.appendChild(input);
+            }
+        }
+
+        function startGame() {
+            const numPlayers = parseInt(numPlayersSelect.value);
+            playerNames = [];
+            for (let i = 0; i < numPlayers; i++) {
+                const nameInput = document.getElementById(`playerName${i+1}`);
+                playerNames.push(nameInput.value.trim() || `Pemain ${i+1}`);
+            }
+            
+            scores = new Array(numPlayers).fill(0);
+            currentPlayerIndex = 0;
+            currentQuestionIndex = 0;
+
+            const selectedCategory = categorySelect.value;
+            const selectedDifficulty = difficultySelect.value;
+
+            currentQuestions = allQuestions.filter(q => 
+                (selectedCategory === "Semua" || q.category === selectedCategory) && 
+                q.difficulty === selectedDifficulty
+            );
+
+            if (currentQuestions.length === 0) {
+                alert("Tidak ada pertanyaan yang tersedia untuk kombinasi kategori dan kesulitan ini. Silakan pilih yang lain.");
+                return;
+            }
+            
+            // Shuffle questions
+            currentQuestions.sort(() => Math.random() - 0.5);
+
+            totalRounds = Math.min(currentQuestions.length, playerNames.length * questionsPerPlayer);
+            if (totalRounds === 0 && currentQuestions.length > 0) totalRounds = currentQuestions.length; // Ensure at least some questions if available
+            
+            currentQuestions = currentQuestions.slice(0, totalRounds); // Limit total questions for the game
+
+            if (currentQuestions.length === 0) {
+                 alert("Tidak cukup pertanyaan untuk memulai permainan dengan pengaturan ini. Silakan pilih yang lain atau tambahkan pertanyaan.");
+                return;
+            }
+
+
+            setupScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            
+            updateScoreBoard();
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex >= totalRounds) {
+                endGame();
+                return;
+            }
+
+            feedbackDisplay.textContent = '';
+            feedbackDisplay.className = 'mt-4 h-8 text-lg font-semibold'; // Reset feedback color
+
+            const question = currentQuestions[currentQuestionIndex];
+            questionNumberDisplay.textContent = `Pertanyaan ${currentQuestionIndex + 1}/${totalRounds}`;
+            questionTextDisplay.textContent = question.text;
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach(optionText => {
+                const button = document.createElement('button');
+                button.textContent = optionText;
+                button.className = 'w-full p-3 rounded-lg text-white option-btn btn';
+                button.onclick = () => handleAnswer(optionText, button);
+                optionsContainer.appendChild(button);
+            });
+
+            currentPlayerTurnDisplay.textContent = `Giliran: ${playerNames[currentPlayerIndex]}`;
+            timeLeft = timerSettings[difficultySelect.value];
+            timerDisplay.textContent = `Waktu: ${timeLeft}s`;
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Waktu: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleAnswer(null, null); // Timeout counts as wrong answer
+                }
+            }, 1000);
+        }
+
+        function handleAnswer(selectedOption, buttonElement) {
+            clearInterval(timerInterval);
+            const question = currentQuestions[currentQuestionIndex];
+            const correctAnswer = question.correctAnswer;
+
+            // Disable all option buttons after an answer is selected or time runs out
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn === buttonElement && selectedOption !== correctAnswer) {
+                     btn.classList.add('incorrect');
+                }
+            });
+
+
+            if (selectedOption === correctAnswer) {
+                scores[currentPlayerIndex] += 10; // Add 10 points for correct answer
+                feedbackDisplay.textContent = "Benar! +10 Poin";
+                feedbackDisplay.classList.add('text-green-400');
+                if(buttonElement) buttonElement.classList.add('correct');
+            } else if (selectedOption !== null) { // Incorrect answer selected
+                feedbackDisplay.textContent = `Salah! Jawaban: ${correctAnswer}`;
+                feedbackDisplay.classList.add('text-red-400');
+                 if(buttonElement) buttonElement.classList.add('incorrect');
+            } else { // Time ran out
+                feedbackDisplay.textContent = `Waktu Habis! Jawaban: ${correctAnswer}`;
+                feedbackDisplay.classList.add('text-yellow-400');
+            }
+            
+            updateScoreBoard();
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.length;
+                if (currentQuestionIndex < totalRounds) {
+                    displayQuestion();
+                } else {
+                    endGame();
+                }
+            }, 2500); // Wait 2.5 seconds before next question or game over
+        }
+
+        function updateScoreBoard() {
+            scoreBoardDisplay.innerHTML = playerNames.map((name, index) => 
+                `<span class="mr-4">${name}: ${scores[index]}</span>`
+            ).join('');
+        }
+
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+
+            let finalScoreText = 'Skor Akhir:<br>';
+            let maxScore = -1;
+            let winners = [];
+
+            playerNames.forEach((name, index) => {
+                finalScoreText += `${name}: ${scores[index]} poin<br>`;
+                if (scores[index] > maxScore) {
+                    maxScore = scores[index];
+                    winners = [name];
+                } else if (scores[index] === maxScore) {
+                    winners.push(name);
+                }
+            });
+            finalScoresDisplay.innerHTML = finalScoreText;
+
+            if (winners.length > 1) {
+                winnerDisplay.textContent = `Seri antara: ${winners.join(', ')}!`;
+            } else if (winners.length === 1) {
+                winnerDisplay.textContent = `Pemenang: ${winners[0]}!`;
+            } else {
+                 winnerDisplay.textContent = "Tidak ada pemenang."; // Should not happen if game played
+            }
+        }
+
+        function resetGame() {
+            gameOverScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+            // Reset player name inputs to default (1 player)
+            numPlayersSelect.value = "1";
+            updatePlayerNameInputs();
+        }
+
+        // Initial setup
+        updatePlayerNameInputs(); // Show name input for 1 player by default
+    </script>
+</body>
+</html>
