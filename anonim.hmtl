@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Forum Anonim ala NGL</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 min-h-screen flex flex-col items-center">
+
+<div class="w-full max-w-sm mx-auto mt-8 bg-white rounded-xl shadow-lg p-6">
+  <h1 class="text-2xl font-bold mb-4 text-center text-purple-700">Forum Anonim by Reno</h1>
+
+  <!-- Login -->
+  <div id="loginBox">
+    <input id="usernameInput" class="border p-2 w-full rounded mb-2" placeholder="Username..." />
+    <button onclick="login()" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-700">Masuk</button>
+  </div>
+
+  <!-- Profil & Inbox -->
+  <div id="profileBox" class="hidden">
+    <div class="mb-3 text-center">
+      <span class="font-semibold">Link anonym kamu:</span>
+      <input id="profileLink" class="w-full text-center bg-gray-100 mt-1 p-1 rounded" readonly/>
+      <button onclick="copyLink()" class="mt-2 bg-blue-400 text-white w-full py-1 rounded">Copy Link</button>
+    </div>
+    <div class="mb-2">
+      <label class="font-semibold">Pesan Masuk</label>
+      <ul id="inbox" class="bg-gray-50 rounded p-2 min-h-[80px]"></ul>
+    </div>
+    <button onclick="logout()" class="bg-red-500 text-white w-full py-1 rounded mt-2">Logout</button>
+  </div>
+
+  <!-- Kirim pesan -->
+  <div id="sendBox" class="hidden">
+    <h2 class="text-lg mb-2 font-semibold text-center">Kirim pesan anonim ke <span id="toUser"></span></h2>
+    <textarea id="messageInput" class="border w-full rounded p-2 mb-2" rows="3" placeholder="Tulis pesanmu..."></textarea>
+    <button onclick="sendMessage()" class="bg-purple-500 text-white py-2 w-full rounded hover:bg-purple-700">Kirim Anonim</button>
+    <button onclick="gotoLogin()" class="text-sm text-gray-600 mt-2 block mx-auto underline">Ganti user</button>
+    <div id="sendStatus" class="text-center text-green-600 mt-2"></div>
+  </div>
+</div>
+
+<script>
+let currentUser = localStorage.getItem('username') || "";
+
+function show(el) { document.getElementById(el).classList.remove('hidden'); }
+function hide(el) { document.getElementById(el).classList.add('hidden'); }
+
+function login() {
+  const username = document.getElementById('usernameInput').value.trim();
+  if (!username) return alert("Isi username!");
+  currentUser = username;
+  localStorage.setItem('username', username);
+  showProfile();
+}
+
+// Simulasi backend pesan (pakai localStorage, backend aslinya pakai DB)
+function getInbox() {
+  const msgs = JSON.parse(localStorage.getItem(`msgs_${currentUser}`) || "[]");
+  let html = "";
+  if (msgs.length === 0) html = "<li class='text-gray-400 text-center'>Belum ada pesan</li>";
+  else html = msgs.map(m => `<li class="mb-2 p-2 border rounded">${m.text}</li>`).join('');
+  document.getElementById('inbox').innerHTML = html;
+}
+
+function showProfile() {
+  hide('loginBox'); hide('sendBox'); show('profileBox');
+  document.getElementById('profileLink').value = `${location.origin}${location.pathname}?send=${currentUser}`;
+  getInbox();
+}
+
+function copyLink() {
+  const link = document.getElementById('profileLink').value;
+  navigator.clipboard.writeText(link);
+  alert("Link disalin!");
+}
+
+function logout() {
+  localStorage.removeItem('username');
+  currentUser = "";
+  show('loginBox'); hide('profileBox'); hide('sendBox');
+}
+
+function gotoLogin() {
+  show('loginBox'); hide('sendBox'); hide('profileBox');
+}
+
+// Kirim pesan anonim
+function showSendBox(user) {
+  hide('loginBox'); hide('profileBox'); show('sendBox');
+  document.getElementById('toUser').textContent = user;
+}
+
+function sendMessage() {
+  const msg = document.getElementById('messageInput').value.trim();
+  const toUser = new URLSearchParams(location.search).get('send');
+  if (!msg || !toUser) return alert("Pesan kosong!");
+  // Simulasi save ke inbox user
+  const arr = JSON.parse(localStorage.getItem(`msgs_${toUser}`) || "[]");
+  arr.push({text: msg, time: Date.now()});
+  localStorage.setItem(`msgs_${toUser}`, JSON.stringify(arr));
+  document.getElementById('messageInput').value = "";
+  document.getElementById('sendStatus').textContent = "Pesan terkirim!";
+  setTimeout(()=>document.getElementById('sendStatus').textContent="",1400);
+}
+
+window.onload = function() {
+  const sendUser = new URLSearchParams(location.search).get('send');
+  if (sendUser) showSendBox(sendUser);
+  else if (currentUser) showProfile();
+  else show('loginBox');
+};
+</script>
+</body>
+</html>
